@@ -9,11 +9,11 @@
 #include <linux/version.h>
 
 #include <asm/io.h>
-#include <asm/uaccess/h>
+#include <asm/uaccess.h>
 
 #define CSEMAD_LED_MAJOR 260
 #define CSEMAD_LED_NAME "csemad_led"
-#define CSEMAD_LED_ADDRESS 0x0800016
+#define CSEMAD_LED_ADDRESS 0x08000016
 
 // Global variable
 static int ledport_usage = 0;
@@ -46,7 +46,8 @@ int __init csemad_led_init(void)
 								return result;
 				}
 
-				csemad_led_addr = ioremap(CSEMAD_LED_ADDRESS, 0x1);
+				csemad_led_addr = ioremap(CSEMAD_LED_ADDRESS, 1);
+				printk(KERN_ALERT "Initialize LED port '%s'\n", csemad_led_addr);
 				return 0;
 }
 
@@ -55,6 +56,7 @@ void __exit csemad_led_exit(void)
 {
 				iounmap(csemad_led_addr);
 				unregister_chrdev(CSEMAD_LED_MAJOR, CSEMAD_LED_NAME);
+				printk(KERN_ALERT "Release LED port\n");
 }
 
 // Open LED port
@@ -62,10 +64,12 @@ int csemad_led_open(struct inode * minode, struct file * mfile)
 {
 				if (ledport_usage != 0)
 				{
+								printk(KERN_ALERT "LED port is busy\n");
 								return -EBUSY;
 				}
 
 				ledport_usage = 1;
+				printk(KERN_ALERT "Open LED port\n");
 				return 0;
 }
 
@@ -73,36 +77,38 @@ int csemad_led_open(struct inode * minode, struct file * mfile)
 int csemad_led_release(struct inode * minode, struct file * mfile)
 {
 				ledport_usage = 0;
+				printk(KERN_ALERT "Close LED port\n");
 				return 0;
 }
 
 // Read from LED port
 ssize_t csemad_led_read(struct file * inode, char * gdata, size_t length, loff_t * off_what)
 {
-				if (copy_to_user(gdata, CSEMAD_LED_ADDR, 1) != 0)
+				if (copy_to_user(gdata, csemad_led_addr, length) != 0)
 				{
 								printk(KERN_ALERT "Failed to read LED");
 								return -EFAULT;
 				}
 
+				printk(KERN_ALERT "Read from LED port\n");
 				return length;
 }
 
 // Write to LED port
 ssize_t csemad_led_write(struct file * inode, const char * gdata, size_t length, loff_t * off_what)
 {
-				char * buffer;
-				if (copy_from_user(buffer, gdata, length) != 0)
+				if (copy_from_user(csemad_led_addr, gdata, 1) != 0)
 				{
 								printk(KERN_ALERT "Failed to write LED");
 								return -EFAULT;
 				}
 
+				printk(KERN_ALERT "Write to LED port\n");
 				return length;
 }
 
 module_init(csemad_led_init);
-moduel_exit(csemad_led_exit);
+module_exit(csemad_led_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("CSEMAD");
