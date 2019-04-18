@@ -1,9 +1,14 @@
-obj-m += led_driver.o
+obj-m = led_driver.o
 
-all: driver
+PWD = $(shell pwd)
+
+all: driver app
 
 driver:
-	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
+
+app:
+	gcc -Wall -static -o test_led test_led.c
 
 clean:
-	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+	rm -rf *.ko *.mod.* *.o test_led Module.symvers modules.order .led* .tmp*
