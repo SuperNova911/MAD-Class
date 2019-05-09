@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "driverManager.h"
 #include "dot_matrix_font.h"
+#include "driverManager.h"
 
 const unsigned char LED_CLEAR_VALUE = 0;
 
@@ -17,21 +17,21 @@ int DotMatrixFD;
 bool openDriver()
 {
     LEDFD = open("/dev/csemad_led", O_RDWR);
-    if (LEDFD != 0)
+    if (LEDFD < 0)
     {
         printf("Failed to open LED driver, result: '%d'\n", LEDFD);
         return false;
     }
 
     PushSwitchFD = open("/dev/csemad_push_switch", O_RDONLY);
-    if (PushSwitchFD != 0)
+    if (PushSwitchFD < 0)
     {
         printf("Failed to open PushSwitch driver, result: '%d'\n", PushSwitchFD);
         return false;
     }
 
-    DotMatrixFD = open("dev/csemad_dot_matrix", O_WRONLY);
-    if (DotMatrixFD != 0)
+    DotMatrixFD = open("/dev/csemad_dot_matrix", O_WRONLY);
+    if (DotMatrixFD < 0)
     {
         printf("Failed to open DotMatirx driver, result: '%d'\n", DotMatrixFD);
         return false;
@@ -132,10 +132,10 @@ bool setDotMatrixByNumber(int value)
 
 void clearDotMatrix()
 {
-    write(DotMatrixFD, dot_matrix_full, sizeof(dot_matrix_full));
+    write(DotMatrixFD, dot_matrix_full, sizeof(dot_matrix_blank));
 }
 
 void setAllDotMatrix()
 {
-    write(DotMatrixFD, dot_matrix_blank, sizeof(dot_matrix_blank));
+    write(DotMatrixFD, dot_matrix_blank, sizeof(dot_matrix_full));
 }

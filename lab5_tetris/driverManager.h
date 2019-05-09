@@ -1,5 +1,9 @@
+#pragma once
+
+#include <stdio.h>
 #include <stdbool.h>
 
+#define LED_MAX 255
 
 bool openDriver();
 void closeDriver();
