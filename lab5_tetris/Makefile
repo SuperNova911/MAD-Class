@@ -10,5 +10,8 @@ driver:
 app:
 	gcc -o tetris tetris.c -Wall -static
 
+game:
+	gcc game.c tetris.c driverManager.c -o game -Wall -static
+
 clean:
 	rm -rf *.ko *.mod.* *.o Module.symvers modules.order .led* .push_switch* .dot_matrix* .tmp*

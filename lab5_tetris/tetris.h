@@ -4,6 +4,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#define BLOCK_TILE_NUMBER 4
+#define BLOCK_SHAPE_ROW 2
+#define BLOCK_SHAPE_COL 3
+#define MAP_ROW 10
+#define MAP_COL 7
+
 typedef enum _Direction
 {
     Up, Down, Left, Right
@@ -23,42 +29,22 @@ typedef struct Point_t
 typedef struct Block_t
 {
     Direction direction;
-    BlockTile shape[2][3];
+    BlockTile tile;
     Point point;
 } Block;
 
-unsigned char I_Block_Shape[2][3] =
-{
-    { 0, 0, 0 },
-    { 1, 1, 1 }
-};
-
-unsigned char J_Block_Shape[2][3] =
-{
-    { 1, 0, 0 },
-    { 1, 1, 1 }
-};
-
-unsigned char S_Block_Shape[2][3] =
-{
-    { 1, 1, 0 },
-    { 0, 1, 1 }
-};
-
-unsigned char T_Block_Shape[2][3] =
-{
-    { 0, 1, 0 },
-    { 1, 1, 1 }
-};
-
-
-void Initialize();
+void InitializeTetris();
 
 void SpawnNextBlock();
 void GenerateBlockBag();
 BlockTile GetNextBlockTile();
+void GetBlockShape(BlockTile blockTile, unsigned char shape[][BLOCK_SHAPE_COL]);
 
 void MoveBlock(Direction direction);
 bool CheckCollision(Block* block, Point point);
+bool CheckOutOfMap(Block* block, Point point);
+
+void DrawMap();
+void GetMap(BlockTile map[][MAP_COL]);
 
 #endif
