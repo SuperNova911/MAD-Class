@@ -1,50 +1,66 @@
-#ifndef _TETRIS_H_
-#define _TETRIS_H_
+#pragma once
 
 #include <stdbool.h>
-#include <stdio.h>
+#include "BlockBag.h"
+#include "Control.h"
+#include "Map.h"
+#include "Point.h"
+#include "TickTimer.h"
 
-#define BLOCK_TILE_NUMBER 4
-#define BLOCK_SHAPE_ROW 2
-#define BLOCK_SHAPE_COL 3
-#define MAP_ROW 10
-#define MAP_COL 7
+#define TETRIS_MAX_LEVEL 9
 
-typedef enum _Direction
+typedef struct TetrisCore_t
 {
-    Up, Down, Left, Right
-} Direction;
+	TickTimer GravityTimer;
+	TickTimer LockTimer;
+	TickTimer SpawnTimer;
+	TickTimer BlinkTimer;
+	bool WaitForLock;
+	bool RenderCurrentBlock;
+	bool EnableGravity;
+} TetrisCore;
 
-typedef enum _BlockTile
+typedef struct TetrisInfo_t
 {
-    Empty = 0, I, J, S, T
-} BlockTile;
+	unsigned int Level;
+	unsigned int Score;
+	unsigned int TotalClearedLine;
+	int Combo;
+	unsigned int Gravity;
+	unsigned int LockDelay;
+	unsigned int SpawnDelay;
+	unsigned int BlinkDelay;
+	bool IsRunning;
+	bool IsGameOver;
+} TetrisInfo;
 
-typedef struct Point_t
+typedef struct TetrisGame_t
 {
-    int x;
-    int y;
-} Point;
+	TetrisMap GameMap;
+	TetrisCore GameCore;
+	TetrisInfo GameInfo;
+	TetrisBlockBag BlockBag;
+	InputInfo UserInput;
+} TetrisGame;
 
-typedef struct Block_t
-{
-    Direction direction;
-    BlockTile tile;
-    Point point;
-} Block;
+void InitializeTetris(TetrisGame* tetris);
+void RunTetris(TetrisGame* tetris);
+void PauseTetris(TetrisGame* tetris);
+void ResumeTetris(TetrisGame* tetris);
+void RenderTetrisMap(TetrisGame* tetris, unsigned char renderedMap[][MAP_COL]);
+bool IsTetrisGameOver(TetrisGame* tetris);
 
-void InitializeTetris();
+void UpdateTetris(TetrisGame* tetris);
+void UpdateGravity(TetrisGame* tetris);
+void UpdateLock(TetrisGame* tetris);
+void Lock(TetrisGame* tetris);
 
-void SpawnNextBlock();
-void GenerateBlockBag();
-BlockTile GetNextBlockTile();
-void GetBlockShape(BlockTile blockTile, unsigned char shape[][BLOCK_SHAPE_COL]);
+void HandleUserInput(TetrisGame* tetris);
+void ReadUserInput(TetrisGame* tetirs, InputInfo* inputInfo);
 
-void MoveBlock(Direction direction);
-bool CheckCollision(Block* block, Point point);
-bool CheckOutOfMap(Block* block, Point point);
+void ControlBlockMovement(TetrisGame* tetris, MoveDirection direction);
+void ControlBlockRotation(TetrisGame* tetris, RotateDirection direction);
+void ControlBlockDropDown(TetrisGame* tetris);
 
-void DrawMap();
-void GetMap(BlockTile map[][MAP_COL]);
-
-#endif
+void LevelUp(TetrisGame* tetris, unsigned int clearedLine);
+void AddScore(TetrisGame* tetris, unsigned int clearedLine);
